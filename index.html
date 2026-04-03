@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BulgariaHomes — Short-Term Rentals</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&family=Fraunces:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --gold: #B5853A; --gold-light: #D4A85A; --gold-muted: rgba(181,133,58,0.12);
+      --bg: #ffffff; --bg-secondary: #f8f7f5; --bg-tertiary: #f2f0ec;
+      --text-primary: #141414; --text-secondary: #6b6867;
+      --border: rgba(0,0,0,0.09); --border-md: rgba(0,0,0,0.16);
+      --radius-sm: 6px; --radius-md: 10px; --radius-lg: 14px; --radius-xl: 20px;
+    }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; color: var(--text-primary); background: var(--bg); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* NAV */
+    .bh-nav { display: flex; align-items: center; justify-content: space-between; padding: 0 24px; height: 56px; border-bottom: 1px solid var(--border); background: var(--bg); position: sticky; top: 0; z-index: 100; }
+    .bh-logo { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 600; color: var(--text-primary); text-decoration: none; cursor: pointer; }
+    .bh-logo span { color: var(--gold); }
+    .bh-nav-center { display: flex; gap: 24px; list-style: none; }
+    .bh-nav-center li { font-size: 13px; color: var(--text-secondary); cursor: pointer; transition: color .15s; }
+    .bh-nav-center li:hover { color: var(--text-primary); }
+    .bh-nav-right { display: flex; gap: 7px; align-items: center; }
+    .lang-btn { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 600; padding: 5px 11px; border-radius: var(--radius-sm); border: 1px solid var(--border-md); background: transparent; color: var(--text-secondary); cursor: pointer; transition: all .15s; letter-spacing: .3px; }
+    .lang-btn:hover, .lang-btn.active { background: var(--text-primary); color: #fff; border-color: var(--text-primary); }
+    .btn-ghost { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 500; padding: 7px 14px; border-radius: var(--radius-md); border: 1px solid var(--border-md); background: transparent; color: var(--text-primary); cursor: pointer; transition: background .15s; }
+    .btn-ghost:hover { background: var(--bg-secondary); }
+    .btn-primary { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 600; padding: 7px 16px; border-radius: var(--radius-md); border: none; background: var(--text-primary); color: #fff; cursor: pointer; transition: opacity .15s; }
+    .btn-primary:hover { opacity: .82; }
+    .hamburger { display: none; flex-direction: column; gap: 4px; cursor: pointer; padding: 4px; background: none; border: none; }
+    .hamburger span { display: block; width: 20px; height: 2px; background: var(--text-primary); border-radius: 2px; }
+
+    /* HERO */
+    .bh-hero { background: linear-gradient(160deg, #111009 0%, #231a08 55%, #2e2210 100%); padding: 60px 24px 48px; position: relative; overflow: hidden; }
+    .bh-hero::after { content: ''; position: absolute; width: 500px; height: 500px; border-radius: 50%; background: radial-gradient(circle, rgba(181,133,58,0.2) 0%, transparent 70%); top: -100px; right: -100px; pointer-events: none; }
+    .bh-hero-inner { position: relative; max-width: 580px; }
+    .bh-hero-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; color: var(--gold-light); background: rgba(181,133,58,0.12); border: 1px solid rgba(181,133,58,0.25); border-radius: 20px; padding: 5px 12px; margin-bottom: 18px; }
+    .bh-hero h1 { font-family: 'Fraunces', serif; font-size: clamp(28px, 5vw, 46px); font-weight: 600; color: #fff; line-height: 1.12; margin-bottom: 12px; letter-spacing: -.5px; }
+    .bh-hero h1 em { font-style: italic; color: var(--gold-light); }
+    .bh-hero p { font-size: 15px; color: rgba(255,255,255,.55); line-height: 1.65; margin-bottom: 28px; max-width: 460px; }
+
+    /* SEARCH */
+    .bh-search-wrap { background: #fff; border-radius: var(--radius-xl); padding: 5px; display: flex; flex-wrap: wrap; gap: 0; max-width: 700px; box-shadow: 0 8px 32px rgba(0,0,0,.25); }
+    .bh-search-field { flex: 1; min-width: 100px; display: flex; flex-direction: column; padding: 9px 13px; border-right: 1px solid var(--border); }
+    .bh-search-field:last-of-type { border-right: none; }
+    .bh-search-label { font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 3px; }
+    .bh-search-field select, .bh-search-field input { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 500; color: var(--text-primary); background: transparent; border: none; outline: none; width: 100%; }
+    .bh-search-btn { background: var(--text-primary); color: #fff; border: none; border-radius: var(--radius-lg); padding: 0 20px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; margin: 3px; white-space: nowrap; transition: opacity .15s; }
+    .bh-search-btn:hover { opacity: .82; }
+    .bh-cities { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
+    .bh-city-pill { font-size: 12px; font-weight: 500; color: rgba(255,255,255,.55); background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); border-radius: 20px; padding: 5px 14px; cursor: pointer; transition: all .15s; }
+    .bh-city-pill:hover { background: rgba(255,255,255,.1); color: rgba(255,255,255,.85); }
+    .bh-city-pill.active { background: rgba(181,133,58,.2); border-color: var(--gold); color: var(--gold-light); }
+
+    /* MAIN */
+    .bh-main { display: grid; grid-template-columns: 255px 1fr; min-height: 700px; }
+    .bh-filters { padding: 20px 16px; border-right: 1px solid var(--border); background: var(--bg); position: sticky; top: 56px; height: calc(100vh - 56px); overflow-y: auto; }
+    .filter-section-title { font-size: 10px; font-weight: 700; letter-spacing: .9px; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 10px; margin-top: 20px; }
+    .filter-section-title:first-child { margin-top: 0; }
+    .bh-price-row { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
+    .bh-price-input { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; padding: 8px 10px; border: 1px solid var(--border-md); border-radius: var(--radius-md); background: var(--bg); color: var(--text-primary); width: 100%; }
+    .bh-check-row { display: flex; align-items: center; gap: 9px; padding: 5px 0; font-size: 13px; color: var(--text-primary); cursor: pointer; }
+    .bh-check-row input[type=checkbox] { cursor: pointer; accent-color: var(--text-primary); width: 14px; height: 14px; }
+    .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+    .bh-tag { font-size: 12px; font-weight: 500; padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border-md); cursor: pointer; color: var(--text-secondary); transition: all .15s; }
+    .bh-tag:hover { border-color: var(--text-primary); color: var(--text-primary); }
+    .bh-tag.active { background: var(--text-primary); border-color: var(--text-primary); color: #fff; }
+    .filters-toggle { display: none; width: 100%; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 600; padding: 10px 16px; border-radius: var(--radius-md); border: 1px solid var(--border-md); background: var(--bg); color: var(--text-primary); cursor: pointer; margin-bottom: 14px; }
+
+    /* LISTINGS */
+    .bh-listings { padding: 20px; background: var(--bg-secondary); }
+    .bh-listing-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .bh-listing-count { font-size: 14px; color: var(--text-secondary); }
+    .bh-listing-count strong { color: var(--text-primary); font-weight: 600; }
+    .bh-sort-select { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 500; padding: 7px 11px; border: 1px solid var(--border-md); border-radius: var(--radius-md); background: var(--bg); color: var(--text-primary); cursor: pointer; }
+    .bh-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+    .bh-card { background: var(--bg); border-radius: var(--radius-lg); border: 1px solid var(--border); overflow: hidden; cursor: pointer; transition: transform .2s, box-shadow .2s; }
+    .bh-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.09); }
+    .bh-card-img { height: 175px; position: relative; overflow: hidden; }
+    .img-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 38px; }
+    .img-sofia { background: linear-gradient(135deg,#2a1f3d,#4a3060); }
+    .img-plovdiv { background: linear-gradient(135deg,#1a2a1a,#2d4a1e); }
+    .img-varna { background: linear-gradient(135deg,#0d2a3d,#1a4a6e); }
+    .img-bansko { background: linear-gradient(135deg,#1a1a2a,#2a2a4a); }
+    .img-rila { background: linear-gradient(135deg,#1a2a20,#1e3d28); }
+    .img-tryavna { background: linear-gradient(135deg,#2a1a0a,#4a2a10); }
+    .bh-card-badge { position: absolute; top: 10px; left: 10px; font-size: 10px; font-weight: 600; padding: 3px 9px; border-radius: 20px; }
+    .badge-verified { background: rgba(20,20,20,.75); color: #fff; }
+    .badge-new { background: rgba(16,130,82,.85); color: #fff; }
+    .badge-popular { background: rgba(181,133,58,.9); color: #fff; }
+    .bh-card-fav { position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; background: rgba(255,255,255,.88); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; transition: background .15s; }
+    .bh-card-fav:hover { background: #fff; }
+    .bh-card-body { padding: 14px; }
+    .bh-card-city { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--gold); font-weight: 600; margin-bottom: 4px; }
+    .bh-card-title { font-family: 'Fraunces', serif; font-size: 15px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; line-height: 1.3; }
+    .bh-card-meta { display: flex; gap: 8px; font-size: 12px; color: var(--text-secondary); margin-bottom: 10px; flex-wrap: wrap; }
+    .bh-card-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid var(--border); }
+    .bh-price { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+    .bh-price span { font-size: 12px; font-weight: 400; color: var(--text-secondary); }
+    .bh-rating { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-secondary); }
+    .bh-avail-row { display: flex; gap: 3px; margin-top: 10px; }
+    .bh-avail-dot { width: 9px; height: 9px; border-radius: 2px; background: #16a37a; }
+    .bh-avail-dot.busy { background: #d8d5d0; }
+    .avail-label { font-size: 10px; color: var(--text-secondary); margin-top: 4px; }
+
+    /* MODAL */
+    .bh-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.48); z-index: 300; align-items: center; justify-content: center; padding: 16px; }
+    .bh-modal-overlay.open { display: flex; }
+    .bh-modal { background: var(--bg); border-radius: var(--radius-xl); width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; padding: 24px; position: relative; }
+    .bh-modal-close { position: absolute; top: 14px; right: 14px; background: var(--bg-secondary); border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-size: 15px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); }
+    .bh-modal-img { height: 200px; border-radius: var(--radius-lg); margin-bottom: 18px; display: flex; align-items: center; justify-content: center; font-size: 48px; }
+    .bh-modal h2 { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+    .bh-modal-city { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--gold); font-weight: 600; margin-bottom: 16px; }
+    .bh-modal-details { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+    .bh-detail-card { background: var(--bg-secondary); border-radius: var(--radius-md); padding: 10px 12px; text-align: center; }
+    .bh-detail-num { font-size: 17px; font-weight: 600; color: var(--text-primary); }
+    .bh-detail-label { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+    .bh-modal-section { font-size: 10px; font-weight: 700; letter-spacing: .9px; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 10px; margin-top: 18px; }
+    .bh-amenity-row { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; }
+    .bh-amenity { font-size: 12px; padding: 4px 11px; border-radius: 16px; background: var(--bg-secondary); border: 1px solid var(--border); color: var(--text-primary); }
+    .bh-book-btn { width: 100%; padding: 14px; background: var(--text-primary); color: #fff; border: none; border-radius: var(--radius-md); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 18px; transition: opacity .15s; }
+    .bh-book-btn:hover { opacity: .82; }
+
+    /* BOOKING PAGE */
+    .booking-page { background: var(--bg-secondary); min-height: calc(100vh - 56px); }
+    .booking-header { background: var(--bg); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 14px; }
+    .back-btn { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: var(--text-secondary); background: none; border: none; cursor: pointer; transition: color .15s; padding: 0; }
+    .back-btn:hover { color: var(--text-primary); }
+    .back-btn svg { width: 16px; height: 16px; }
+    .booking-header h2 { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 600; }
+    .booking-inner { max-width: 860px; margin: 0 auto; padding: 28px 20px; display: grid; grid-template-columns: 1fr 340px; gap: 22px; }
+    .booking-form-card { background: var(--bg); border-radius: var(--radius-xl); border: 1px solid var(--border); padding: 24px; }
+    .booking-section-title { font-size: 10px; font-weight: 700; letter-spacing: .9px; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 14px; margin-top: 24px; }
+    .booking-section-title:first-child { margin-top: 0; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .form-row.single { grid-template-columns: 1fr; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-label { font-size: 12px; font-weight: 600; color: var(--text-primary); }
+    .form-input, .form-select, .form-textarea { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; color: var(--text-primary); padding: 10px 12px; border: 1px solid var(--border-md); border-radius: var(--radius-md); background: var(--bg); outline: none; transition: border-color .15s; width: 100%; }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--text-primary); }
+    .form-textarea { resize: vertical; min-height: 90px; }
+    .payment-methods { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+    .pay-option { flex: 1; min-width: 90px; display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 12px 8px; border-radius: var(--radius-md); border: 1.5px solid var(--border-md); cursor: pointer; font-size: 12px; font-weight: 500; color: var(--text-secondary); transition: all .15s; }
+    .pay-option.selected { border-color: var(--text-primary); color: var(--text-primary); background: var(--bg-secondary); }
+    .pay-option span.pay-icon { font-size: 22px; }
+    .card-fields { display: none; }
+    .card-fields.visible { display: block; }
+    .terms-row { display: flex; align-items: flex-start; gap: 10px; padding: 14px 0; border-top: 1px solid var(--border); margin-top: 12px; }
+    .terms-row input { accent-color: var(--text-primary); margin-top: 2px; cursor: pointer; }
+    .terms-row label { font-size: 13px; color: var(--text-secondary); line-height: 1.5; cursor: pointer; }
+    .terms-row a { color: var(--text-primary); }
+    .submit-booking-btn { width: 100%; padding: 14px; background: var(--text-primary); color: #fff; border: none; border-radius: var(--radius-md); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 16px; transition: opacity .15s; }
+    .submit-booking-btn:hover { opacity: .82; }
+
+    /* SUMMARY */
+    .booking-summary { background: var(--bg); border-radius: var(--radius-xl); border: 1px solid var(--border); padding: 20px; position: sticky; top: 80px; align-self: start; }
+    .summary-img { height: 140px; border-radius: var(--radius-lg); margin-bottom: 14px; display: flex; align-items: center; justify-content: center; font-size: 42px; }
+    .summary-title { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 600; margin-bottom: 3px; }
+    .summary-city { font-size: 11px; color: var(--gold); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 14px; }
+    .summary-line { display: flex; justify-content: space-between; align-items: center; font-size: 13px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .summary-line:last-of-type { border-bottom: none; }
+    .summary-line .label { color: var(--text-secondary); }
+    .summary-line .value { font-weight: 500; }
+    .summary-total { display: flex; justify-content: space-between; align-items: center; font-size: 16px; font-weight: 700; padding: 14px 0 0; border-top: 1.5px solid var(--text-primary); margin-top: 6px; }
+    .trust-badges { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+    .trust-badge { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary); }
+    .trust-badge-icon { width: 28px; height: 28px; border-radius: 8px; background: var(--bg-secondary); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+
+    /* CONFIRMATION */
+    .confirm-page { display: flex; align-items: center; justify-content: center; min-height: calc(100vh - 56px); padding: 32px 20px; background: var(--bg-secondary); }
+    .confirm-card { background: var(--bg); border-radius: var(--radius-xl); border: 1px solid var(--border); padding: 40px 32px; max-width: 480px; width: 100%; text-align: center; }
+    .confirm-icon { width: 64px; height: 64px; border-radius: 50%; background: #e8f7f0; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 20px; }
+    .confirm-card h2 { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 600; margin-bottom: 10px; }
+    .confirm-card p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 24px; }
+    .confirm-ref { background: var(--bg-secondary); border-radius: var(--radius-md); padding: 14px 20px; margin-bottom: 24px; font-size: 13px; color: var(--text-secondary); }
+    .confirm-ref strong { color: var(--text-primary); font-size: 18px; display: block; margin-top: 4px; letter-spacing: 1px; }
+    .confirm-details { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 28px; }
+    .confirm-detail { background: var(--bg-secondary); border-radius: var(--radius-md); padding: 12px; text-align: left; }
+    .confirm-detail .cd-label { font-size: 10px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: var(--text-secondary); }
+    .confirm-detail .cd-value { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-top: 3px; }
+
+    /* FOOTER */
+    .bh-footer { border-top: 1px solid var(--border); padding: 32px 24px; display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 32px; background: var(--bg); }
+    .bh-footer-logo { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+    .bh-footer-logo span { color: var(--gold); }
+    .bh-footer p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+    .bh-footer-col h4 { font-size: 10px; font-weight: 700; letter-spacing: .9px; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 12px; }
+    .bh-footer-col ul { list-style: none; }
+    .bh-footer-col ul li { font-size: 13px; color: var(--text-secondary); padding: 3px 0; cursor: pointer; transition: color .15s; }
+    .bh-footer-col ul li:hover { color: var(--text-primary); }
+    .bh-footer-bottom { border-top: 1px solid var(--border); padding: 14px 24px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-secondary); }
+
+    /* MOBILE */
+    @media (max-width: 768px) {
+      .bh-nav-center { display: none; }
+      .hamburger { display: flex; }
+      .btn-ghost { display: none; }
+      .btn-primary { display: none; }
+      .bh-main { grid-template-columns: 1fr; }
+      .bh-filters { position: static; height: auto; display: none; }
+      .bh-filters.mobile-open { display: block; }
+      .filters-toggle { display: block; }
+      .bh-grid { grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 12px; }
+      .bh-card-img { height: 140px; }
+      .booking-inner { grid-template-columns: 1fr; }
+      .booking-summary { position: static; order: -1; }
+      .bh-footer { grid-template-columns: 1fr 1fr; gap: 24px; }
+      .bh-footer-bottom { flex-direction: column; gap: 6px; text-align: center; }
+      .form-row { grid-template-columns: 1fr; }
+      .confirm-details { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 480px) {
+      .bh-hero { padding: 36px 16px 32px; }
+      .bh-listings { padding: 12px; }
+      .bh-grid { grid-template-columns: 1fr 1fr; }
+      .bh-search-field { padding: 7px 9px; min-width: 80px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- PAGE 1: MAIN -->
+<div class="page active" id="page-main">
+  <nav class="bh-nav">
+    <div class="bh-logo" onclick="goHome()">Bul<span>ga</span>ria Homes</div>
+    <ul class="bh-nav-center">
+      <li data-i18n="nav_rentals">Rentals</li>
+      <li data-i18n="nav_longterm">Long-term</li>
+      <li data-i18n="nav_host">Host your place</li>
+    </ul>
+    <div class="bh-nav-right">
+      <button class="lang-btn active" id="lang-en" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" id="lang-bg" onclick="setLang('bg')">БГ</button>
+      <button class="btn-ghost" data-i18n="nav_signin">Sign in</button>
+      <button class="btn-primary" data-i18n="nav_list">List property</button>
+      <button class="hamburger" onclick="document.getElementById('bh-filters').classList.toggle('mobile-open')"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+
+  <section class="bh-hero">
+    <div class="bh-hero-inner">
+      <div class="bh-hero-chip" data-i18n="hero_chip">🇧🇬 Bulgaria — Where Europe Feels New</div>
+      <h1 data-i18n="hero_h1">Find your stay in <em>Bulgaria</em>, hassle-free.</h1>
+      <p data-i18n="hero_p">Verified short-term rentals across Sofia, Plovdiv, Varna, Bansko and beyond. No agency fees.</p>
+      <div class="bh-search-wrap">
+        <div class="bh-search-field">
+          <div class="bh-search-label" data-i18n="search_city">City</div>
+          <select id="city-select"><option>Sofia</option><option>Plovdiv</option><option>Varna</option><option>Bansko</option><option>Rila</option><option>Tryavna</option><option>Burgas</option></select>
+        </div>
+        <div class="bh-search-field">
+          <div class="bh-search-label" data-i18n="search_checkin">Check-in</div>
+          <input type="date" id="checkin-date">
+        </div>
+        <div class="bh-search-field">
+          <div class="bh-search-label" data-i18n="search_checkout">Check-out</div>
+          <input type="date" id="checkout-date">
+        </div>
+        <div class="bh-search-field" style="border-right:none;max-width:75px">
+          <div class="bh-search-label" data-i18n="search_guests">Guests</div>
+          <input type="number" min="1" max="12" value="2">
+        </div>
+        <button class="bh-search-btn" onclick="doSearch()" data-i18n="search_btn">Search</button>
+      </div>
+      <div class="bh-cities">
+        <div class="bh-city-pill active" onclick="filterCity(this,'')" data-i18n="city_all">All Bulgaria</div>
+        <div class="bh-city-pill" onclick="filterCity(this,'Sofia')">Sofia</div>
+        <div class="bh-city-pill" onclick="filterCity(this,'Plovdiv')">Plovdiv</div>
+        <div class="bh-city-pill" onclick="filterCity(this,'Varna')">Varna</div>
+        <div class="bh-city-pill" onclick="filterCity(this,'Bansko')">Bansko</div>
+        <div class="bh-city-pill" onclick="filterCity(this,'Rila')">Rila</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="bh-main">
+    <aside class="bh-filters" id="bh-filters">
+      <div class="filter-section-title" data-i18n="filter_price">Price per night</div>
+      <div class="bh-price-row">
+        <input class="bh-price-input" type="number" placeholder="Min (€)" value="15">
+        <span style="font-size:13px;color:var(--text-secondary)">–</span>
+        <input class="bh-price-input" type="number" placeholder="Max (€)" value="150">
+      </div>
+      <div class="filter-section-title" data-i18n="filter_type">Property type</div>
+      <div class="tag-row">
+        <div class="bh-tag active" onclick="this.classList.toggle('active')" data-i18n="type_apt">Apartment</div>
+        <div class="bh-tag" onclick="this.classList.toggle('active')" data-i18n="type_studio">Studio</div>
+        <div class="bh-tag" onclick="this.classList.toggle('active')" data-i18n="type_house">House</div>
+        <div class="bh-tag" onclick="this.classList.toggle('active')" data-i18n="type_villa">Villa</div>
+        <div class="bh-tag" onclick="this.classList.toggle('active')" data-i18n="type_chalet">Chalet</div>
+      </div>
+      <div class="filter-section-title" data-i18n="filter_beds">Bedrooms</div>
+      <div class="tag-row">
+        <div class="bh-tag active" onclick="this.classList.toggle('active')" data-i18n="beds_any">Any</div>
+        <div class="bh-tag" onclick="this.classList.toggle('active')">1</div>
+        <div class="bh-tag" onclick="this.classList.toggle('active')">2</div>
+        <div class="bh-tag" onclick="this.classList.toggle('active')">3+</div>
+      </div>
+      <div class="filter-section-title" data-i18n="filter_amenities">Amenities</div>
+      <label class="bh-check-row"><input type="checkbox" checked><span data-i18n="am_wifi">Wi-Fi</span></label>
+      <label class="bh-check-row"><input type="checkbox"><span data-i18n="am_parking">Parking</span></label>
+      <label class="bh-check-row"><input type="checkbox"><span data-i18n="am_ac">Air conditioning</span></label>
+      <label class="bh-check-row"><input type="checkbox"><span data-i18n="am_pet">Pet-friendly</span></label>
+      <label class="bh-check-row"><input type="checkbox"><span data-i18n="am_balcony">Balcony</span></label>
+      <label class="bh-check-row"><input type="checkbox"><span data-i18n="am_wash">Washing machine</span></label>
+      <div class="filter-section-title" data-i18n="filter_special">Special</div>
+      <label class="bh-check-row"><input type="checkbox" checked><span data-i18n="sp_verified">Verified</span></label>
+      <label class="bh-check-row"><input type="checkbox"><span data-i18n="sp_instant">Instant book</span></label>
+      <label class="bh-check-row"><input type="checkbox"><span data-i18n="sp_bills">Bills included</span></label>
+    </aside>
+
+    <div class="bh-listings">
+      <button class="filters-toggle" onclick="document.getElementById('bh-filters').classList.toggle('mobile-open')" data-i18n="filters_btn">⚙ Filters</button>
+      <div class="bh-listing-header">
+        <div class="bh-listing-count"><span data-i18n="showing">Showing</span> <strong id="count-display">9</strong> <span data-i18n="rentals_in">rentals in</span> <strong id="city-display">All Bulgaria</strong></div>
+        <select class="bh-sort-select" onchange="sortListings(this.value)">
+          <option value="best" data-i18n="sort_best">Best match</option>
+          <option value="price-asc" data-i18n="sort_low">Price: Low → High</option>
+          <option value="price-desc" data-i18n="sort_high">Price: High → Low</option>
+          <option value="rating" data-i18n="sort_rating">Top rated</option>
+        </select>
+      </div>
+      <div class="bh-grid" id="listings-grid"></div>
+    </div>
+  </div>
+
+  <footer class="bh-footer">
+    <div>
+      <div class="bh-footer-logo">Bul<span>ga</span>ria Homes</div>
+      <p data-i18n="footer_about">The easiest way to find verified short-term rentals across Bulgaria.</p>
+    </div>
+    <div class="bh-footer-col"><h4 data-i18n="footer_explore">Explore</h4><ul><li>Sofia</li><li>Plovdiv</li><li>Varna</li><li>Bansko</li><li>Rila</li></ul></div>
+    <div class="bh-footer-col"><h4 data-i18n="footer_hosts">Hosts</h4><ul><li data-i18n="f_list">List your property</li><li data-i18n="f_guide">Host guidelines</li><li data-i18n="f_verify">Verification</li><li data-i18n="f_support">Support</li></ul></div>
+    <div class="bh-footer-col"><h4 data-i18n="footer_company">Company</h4><ul><li data-i18n="f_about">About us</li><li data-i18n="f_privacy">Privacy policy</li><li data-i18n="f_terms">Terms</li><li data-i18n="f_careers">Careers</li></ul></div>
+  </footer>
+  <div class="bh-footer-bottom"><span>© 2026 BulgariaHomes</span><span data-i18n="footer_made">Made with care in Sofia 🇧🇬</span></div>
+</div>
+
+<!-- MODAL -->
+<div class="bh-modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="bh-modal">
+    <button class="bh-modal-close" onclick="closeModalDirect()">✕</button>
+    <div class="bh-modal-img" id="modal-img"></div>
+    <div class="bh-modal-city" id="modal-city"></div>
+    <h2 id="modal-title"></h2>
+    <div class="bh-modal-details" id="modal-details"></div>
+    <div class="bh-modal-section" data-i18n="amenities">Amenities</div>
+    <div class="bh-amenity-row" id="modal-amenities"></div>
+    <div class="bh-modal-section" data-i18n="availability">Availability — next 10 days</div>
+    <div class="bh-avail-row" id="modal-avail"></div>
+    <button class="bh-book-btn" id="modal-book-btn" data-i18n="request_book">Request to Book</button>
+  </div>
+</div>
+
+<!-- PAGE 2: BOOKING -->
+<div class="page" id="page-booking">
+  <nav class="bh-nav">
+    <div class="bh-logo" onclick="goHome()">Bul<span>ga</span>ria Homes</div>
+    <div class="bh-nav-right">
+      <button class="lang-btn" id="lang-en-b" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" id="lang-bg-b" onclick="setLang('bg')">БГ</button>
+    </div>
+  </nav>
+  <div class="booking-page">
+    <div class="booking-header">
+      <button class="back-btn" onclick="goBack()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M5 12l7 7M5 12l7-7"/></svg>
+        <span data-i18n="back">Back</span>
+      </button>
+      <h2 data-i18n="booking_title">Complete your booking</h2>
+    </div>
+    <div class="booking-inner">
+      <div class="booking-form-card">
+        <div class="booking-section-title" data-i18n="your_details">Your details</div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label" data-i18n="first_name">First name</label><input class="form-input" type="text" placeholder="Ivan"></div>
+          <div class="form-group"><label class="form-label" data-i18n="last_name">Last name</label><input class="form-input" type="text" placeholder="Petrov"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label" data-i18n="email">Email</label><input class="form-input" type="email" placeholder="ivan@email.com"></div>
+          <div class="form-group"><label class="form-label" data-i18n="phone">Phone</label><input class="form-input" type="tel" placeholder="+359 88..."></div>
+        </div>
+        <div class="booking-section-title" data-i18n="trip_details">Trip details</div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label" data-i18n="check_in">Check-in</label><input class="form-input" type="date" id="book-checkin"></div>
+          <div class="form-group"><label class="form-label" data-i18n="check_out">Check-out</label><input class="form-input" type="date" id="book-checkout"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label" data-i18n="num_guests">Guests</label><select class="form-select"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></div>
+          <div class="form-group"><label class="form-label" data-i18n="purpose">Purpose of stay</label><select class="form-select"><option data-i18n="p_leisure">Leisure</option><option data-i18n="p_work">Work / Remote</option><option data-i18n="p_study">Studies</option><option data-i18n="p_family">Family visit</option></select></div>
+        </div>
+        <div class="form-row single">
+          <div class="form-group"><label class="form-label" data-i18n="message_host">Message to host (optional)</label><textarea class="form-textarea" placeholder="Tell the host about yourself..."></textarea></div>
+        </div>
+        <div class="booking-section-title" data-i18n="payment_method">Payment method</div>
+        <div class="payment-methods">
+          <div class="pay-option selected" onclick="selectPay(this,'card')"><span class="pay-icon">💳</span><span data-i18n="pay_card">Card</span></div>
+          <div class="pay-option" onclick="selectPay(this,'paypal')"><span class="pay-icon">🅿</span><span>PayPal</span></div>
+          <div class="pay-option" onclick="selectPay(this,'revolut')"><span class="pay-icon">🔄</span><span>Revolut</span></div>
+          <div class="pay-option" onclick="selectPay(this,'bank')"><span class="pay-icon">🏦</span><span data-i18n="pay_bank">Bank transfer</span></div>
+        </div>
+        <div class="card-fields visible" id="card-fields">
+          <div class="form-row single"><div class="form-group"><label class="form-label" data-i18n="card_number">Card number</label><input class="form-input" type="text" placeholder="1234 5678 9012 3456" maxlength="19"></div></div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label" data-i18n="card_expiry">Expiry</label><input class="form-input" type="text" placeholder="MM / YY" maxlength="7"></div>
+            <div class="form-group"><label class="form-label">CVV</label><input class="form-input" type="text" placeholder="•••" maxlength="4"></div>
+          </div>
+        </div>
+        <div class="terms-row">
+          <input type="checkbox" id="terms-check">
+          <label for="terms-check" data-i18n="terms_text">I agree to the <a href="#">Terms of Service</a> and <a href="#">Cancellation Policy</a>.</label>
+        </div>
+        <button class="submit-booking-btn" onclick="submitBooking()" data-i18n="confirm_booking">Confirm &amp; Pay</button>
+      </div>
+      <div class="booking-summary">
+        <div class="summary-img" id="summary-img"></div>
+        <div class="summary-city" id="summary-city"></div>
+        <div class="summary-title" id="summary-title"></div>
+        <div style="margin-top:16px">
+          <div class="summary-line"><span class="label" data-i18n="price_night">Price / night</span><span class="value" id="summary-price-night"></span></div>
+          <div class="summary-line"><span class="label" data-i18n="nights">Nights</span><span class="value" id="summary-nights">—</span></div>
+          <div class="summary-line"><span class="label" data-i18n="service_fee">Service fee (5%)</span><span class="value" id="summary-fee"></span></div>
+        </div>
+        <div class="summary-total"><span data-i18n="total">Total</span><span id="summary-total">—</span></div>
+        <div class="trust-badges">
+          <div class="trust-badge"><div class="trust-badge-icon">🔒</div><span data-i18n="trust_secure">Secure payment — SSL</span></div>
+          <div class="trust-badge"><div class="trust-badge-icon">✅</div><span data-i18n="trust_verified">Verified host</span></div>
+          <div class="trust-badge"><div class="trust-badge-icon">↩️</div><span data-i18n="trust_cancel">Free cancellation 24h</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 3: CONFIRMATION -->
+<div class="page" id="page-confirm">
+  <nav class="bh-nav">
+    <div class="bh-logo" onclick="goHome()">Bul<span>ga</span>ria Homes</div>
+    <div class="bh-nav-right">
+      <button class="lang-btn" id="lang-en-c" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" id="lang-bg-c" onclick="setLang('bg')">БГ</button>
+    </div>
+  </nav>
+  <div class="confirm-page">
+    <div class="confirm-card">
+      <div class="confirm-icon">✅</div>
+      <h2 data-i18n="confirm_h2">Booking Confirmed!</h2>
+      <p data-i18n="confirm_p">Your request has been sent to the host. You'll receive an email confirmation shortly.</p>
+      <div class="confirm-ref"><span data-i18n="booking_ref">Booking reference</span><strong id="confirm-ref-num"></strong></div>
+      <div class="confirm-details" id="confirm-details"></div>
+      <button class="btn-primary" style="width:100%;padding:12px;font-size:14px" onclick="goHome()" data-i18n="browse_more">Browse more properties</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const T = {
+  en: {
+    nav_rentals:'Rentals',nav_longterm:'Long-term',nav_host:'Host your place',nav_signin:'Sign in',nav_list:'List property',
+    hero_chip:'🇧🇬 Bulgaria — Where Europe Feels New',
+    hero_h1:'Find your stay in <em>Bulgaria</em>, hassle-free.',
+    hero_p:'Verified short-term rentals across Sofia, Plovdiv, Varna, Bansko and beyond. No agency fees.',
+    search_city:'City',search_checkin:'Check-in',search_checkout:'Check-out',search_guests:'Guests',search_btn:'Search',
+    city_all:'All Bulgaria',
+    filter_price:'Price per night',filter_type:'Property type',filter_beds:'Bedrooms',filter_amenities:'Amenities',filter_special:'Special',
+    type_apt:'Apartment',type_studio:'Studio',type_house:'House',type_villa:'Villa',type_chalet:'Chalet',beds_any:'Any',
+    am_wifi:'Wi-Fi',am_parking:'Parking',am_ac:'Air conditioning',am_pet:'Pet-friendly',am_balcony:'Balcony',am_wash:'Washing machine',
+    sp_verified:'Verified',sp_instant:'Instant book',sp_bills:'Bills included',
+    showing:'Showing',rentals_in:'rentals in',
+    sort_best:'Best match',sort_low:'Price: Low → High',sort_high:'Price: High → Low',sort_rating:'Top rated',
+    amenities:'Amenities',availability:'Availability — next 10 days',request_book:'Request to Book',
+    filters_btn:'⚙ Filters',
+    footer_about:'The easiest way to find verified short-term rentals across Bulgaria.',
+    footer_explore:'Explore',footer_hosts:'Hosts',footer_company:'Company',
+    f_list:'List your property',f_guide:'Host guidelines',f_verify:'Verification',f_support:'Support',
+    f_about:'About us',f_privacy:'Privacy policy',f_terms:'Terms',f_careers:'Careers',
+    footer_made:'Made with care in Sofia 🇧🇬',
+    back:'Back',booking_title:'Complete your booking',
+    your_details:'Your details',first_name:'First name',last_name:'Last name',email:'Email',phone:'Phone',
+    trip_details:'Trip details',check_in:'Check-in',check_out:'Check-out',num_guests:'Guests',purpose:'Purpose of stay',
+    p_leisure:'Leisure',p_work:'Work / Remote',p_study:'Studies',p_family:'Family visit',
+    message_host:'Message to host (optional)',payment_method:'Payment method',pay_card:'Card',pay_bank:'Bank transfer',
+    card_number:'Card number',card_expiry:'Expiry',
+    terms_text:'I agree to the <a href="#">Terms of Service</a> and <a href="#">Cancellation Policy</a>.',
+    confirm_booking:'Confirm & Pay',
+    price_night:'Price / night',nights:'Nights',service_fee:'Service fee (5%)',total:'Total',
+    trust_secure:'Secure payment — SSL',trust_verified:'Verified host',trust_cancel:'Free cancellation 24h',
+    confirm_h2:'Booking Confirmed!',
+    confirm_p:"Your request has been sent to the host. You'll receive an email confirmation shortly.",
+    booking_ref:'Booking reference',browse_more:'Browse more properties',
+    night:'/night',guests:'guests',beds:'beds',bed:'bed',reviews:'reviews',
+  },
+  bg: {
+    nav_rentals:'Наеми',nav_longterm:'Дългосрочни',nav_host:'Стани домакин',nav_signin:'Вход',nav_list:'Публикувай',
+    hero_chip:'🇧🇬 България — където Европа се чувства нова',
+    hero_h1:'Намери своя престой в <em>България</em> лесно.',
+    hero_p:'Проверени краткосрочни наеми в София, Пловдив, Варна, Банско и другаде. Без агентски такси.',
+    search_city:'Град',search_checkin:'Настаняване',search_checkout:'Напускане',search_guests:'Гости',search_btn:'Търси',
+    city_all:'Цяла България',
+    filter_price:'Цена на нощ',filter_type:'Вид имот',filter_beds:'Спални',filter_amenities:'Удобства',filter_special:'Специални',
+    type_apt:'Апартамент',type_studio:'Студио',type_house:'Къща',type_villa:'Вила',type_chalet:'Шале',beds_any:'Всички',
+    am_wifi:'Wi-Fi',am_parking:'Паркинг',am_ac:'Климатик',am_pet:'Домашни любимци',am_balcony:'Балкон',am_wash:'Пералня',
+    sp_verified:'Верифициран',sp_instant:'Моментална резервация',sp_bills:'Включени сметки',
+    showing:'Показвам',rentals_in:'наема в',
+    sort_best:'Най-подходящи',sort_low:'Цена: Ниска → Висока',sort_high:'Цена: Висока → Ниска',sort_rating:'Най-оценявани',
+    amenities:'Удобства',availability:'Наличност — следващите 10 дни',request_book:'Заяви резервация',
+    filters_btn:'⚙ Филтри',
+    footer_about:'Най-лесният начин да намериш проверени краткосрочни наеми в България.',
+    footer_explore:'Градове',footer_hosts:'Домакини',footer_company:'За нас',
+    f_list:'Публикувай имот',f_guide:'Насоки',f_verify:'Верификация',f_support:'Поддръжка',
+    f_about:'За нас',f_privacy:'Поверителност',f_terms:'Условия',f_careers:'Кариери',
+    footer_made:'Направено с грижа в София 🇧🇬',
+    back:'Назад',booking_title:'Завърши резервацията',
+    your_details:'Твоите данни',first_name:'Собствено',last_name:'Фамилия',email:'Имейл',phone:'Телефон',
+    trip_details:'Детайли',check_in:'Настаняване',check_out:'Напускане',num_guests:'Брой гости',purpose:'Цел',
+    p_leisure:'Почивка',p_work:'Работа / Дистанционна',p_study:'Обучение',p_family:'Семейно',
+    message_host:'Съобщение до домакина (по желание)',payment_method:'Начин на плащане',pay_card:'Карта',pay_bank:'Банков превод',
+    card_number:'Номер на карта',card_expiry:'Валидност',
+    terms_text:'Съгласявам се с <a href="#">Условията</a> и <a href="#">Политиката за отказ</a>.',
+    confirm_booking:'Потвърди и плати',
+    price_night:'Цена / нощ',nights:'Нощи',service_fee:'Такса (5%)',total:'Общо',
+    trust_secure:'Сигурно плащане — SSL',trust_verified:'Верифициран домакин',trust_cancel:'Безплатен отказ 24ч',
+    confirm_h2:'Резервацията е потвърдена!',
+    confirm_p:'Заявката е изпратена. Ще получиш имейл с потвърждение.',
+    booking_ref:'Номер на резервация',browse_more:'Разгледай още',
+    night:'/нощ',guests:'гости',beds:'стаи',bed:'стая',reviews:'отзива',
+  }
+};
+
+let lang = 'en', currentCity = '', currentSort = 'best', selectedListing = null;
+
+function setLang(l) {
+  lang = l;
+  ['lang-en','lang-en-b','lang-en-c'].forEach(id => { const el = document.getElementById(id); if(el) el.classList.toggle('active', l==='en'); });
+  ['lang-bg','lang-bg-b','lang-bg-c'].forEach(id => { const el = document.getElementById(id); if(el) el.classList.toggle('active', l==='bg'); });
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.getAttribute('data-i18n');
+    if (T[l][k] !== undefined) el.innerHTML = T[l][k];
+  });
+  renderListings();
+}
+
+const listings = [
+  {city:'Sofia',   title:'Bright studio in Lozenets',         titleBG:'Ярко студио в Лозенец',             type:'Studio',    beds:1,guests:2,price:38,rating:4.9,reviews:127,badge:'verified',img:'img-sofia',   emoji:'🏙️',avail:[1,1,1,0,0,1,1,1,1,0],amenities:['Wi-Fi','AC','Washing machine','Balcony','City view']},
+  {city:'Plovdiv', title:'Revival house in the Old Town',      titleBG:'Къща в Стария Град',                type:'House',     beds:2,guests:4,price:72,rating:5.0,reviews:43, badge:'popular', img:'img-plovdiv', emoji:'🏡',avail:[1,1,0,0,1,1,1,0,1,1],amenities:['Wi-Fi','Parking','Garden','BBQ','Fireplace']},
+  {city:'Varna',   title:'Sea-view flat near the beach',       titleBG:'Апартамент с морска гледка',        type:'Apartment', beds:1,guests:3,price:55,rating:4.7,reviews:89, badge:'new',      img:'img-varna',   emoji:'🌊',avail:[0,1,1,1,1,0,0,1,1,1],amenities:['Wi-Fi','AC','Sea view','Balcony','Beach towels']},
+  {city:'Bansko',  title:'Ski chalet steps from the lifts',    titleBG:'Шале до ски пистите',               type:'Chalet',    beds:3,guests:6,price:95,rating:4.8,reviews:62, badge:'verified', img:'img-bansko',  emoji:'⛷️',avail:[1,0,0,1,1,1,0,0,1,1],amenities:['Wi-Fi','Fireplace','Ski storage','Parking','Hot tub']},
+  {city:'Sofia',   title:'Modern 2BR near NDK park',           titleBG:'Модерен апартамент до НДК',         type:'Apartment', beds:2,guests:4,price:60,rating:4.6,reviews:200,badge:'verified', img:'img-sofia',   emoji:'🏢',avail:[1,1,1,1,0,1,1,1,0,1],amenities:['Wi-Fi','AC','Dishwasher','Gym access','Parking']},
+  {city:'Rila',    title:'Mountain cabin with fireplace',      titleBG:'Планинска вила с камина',           type:'Villa',     beds:2,guests:5,price:45,rating:4.9,reviews:31, badge:'new',      img:'img-rila',    emoji:'🌲',avail:[1,1,0,1,1,0,1,1,1,0],amenities:['Wi-Fi','Fireplace','Hiking trails','BBQ','Pet-friendly']},
+  {city:'Tryavna', title:'Traditional Bulgarian guesthouse',   titleBG:'Традиционна гостилница',            type:'House',     beds:3,guests:6,price:58,rating:4.8,reviews:55, badge:'verified', img:'img-tryavna', emoji:'🏠',avail:[0,1,1,1,0,1,1,0,1,1],amenities:['Wi-Fi','Breakfast','Garden','Parking','Traditional decor']},
+  {city:'Plovdiv', title:'Cozy studio near Kapana',            titleBG:'Уютно студио до Капана',            type:'Studio',    beds:1,guests:2,price:32,rating:4.7,reviews:74, badge:'verified', img:'img-plovdiv', emoji:'🎨',avail:[1,0,1,1,1,1,0,1,0,1],amenities:['Wi-Fi','AC','Washing machine','City centre','Art district']},
+  {city:'Varna',   title:'Penthouse with panoramic sea views', titleBG:'Пентхаус с панорамна морска гледка',type:'Apartment', beds:2,guests:4,price:88,rating:4.9,reviews:22, badge:'popular',  img:'img-varna',   emoji:'🌅',avail:[1,1,1,0,1,1,1,0,0,1],amenities:['Wi-Fi','AC','Rooftop terrace','Sea view','Concierge']},
+];
+
+function badgeClass(b) { return b==='verified'?'badge-verified':b==='new'?'badge-new':'badge-popular'; }
+function badgeLbl(b,l) {
+  const map = { en:{verified:'✓ Verified',new:'✦ New',popular:'▲ Popular'}, bg:{verified:'✓ Верифициран',new:'✦ Нов',popular:'▲ Популярен'} };
+  return map[l][b];
+}
+
+function renderListings() {
+  const list = [...listings].filter(l => !currentCity || l.city === currentCity);
+  if (currentSort==='price-asc') list.sort((a,b)=>a.price-b.price);
+  else if (currentSort==='price-desc') list.sort((a,b)=>b.price-a.price);
+  else if (currentSort==='rating') list.sort((a,b)=>b.rating-a.rating);
+  document.getElementById('count-display').textContent = list.length;
+  document.getElementById('city-display').textContent = currentCity || T[lang].city_all;
+  document.getElementById('listings-grid').innerHTML = list.map(l => {
+    const idx = listings.indexOf(l);
+    const title = lang==='bg' ? l.titleBG : l.title;
+    return `<div class="bh-card" onclick="openModal(${idx})">
+      <div class="bh-card-img">
+        <div class="img-placeholder ${l.img}">${l.emoji}</div>
+        <div class="bh-card-badge ${badgeClass(l.badge)}">${badgeLbl(l.badge,lang)}</div>
+        <div class="bh-card-fav" onclick="event.stopPropagation();this.textContent=this.textContent==='♡'?'♥':'♡'">♡</div>
+      </div>
+      <div class="bh-card-body">
+        <div class="bh-card-city">${l.city}</div>
+        <div class="bh-card-title">${title}</div>
+        <div class="bh-card-meta"><span>${l.beds} ${l.beds>1?T[lang].beds:T[lang].bed}</span>·<span>${l.guests} ${T[lang].guests}</span>·<span>${l.type}</span></div>
+        <div class="bh-card-footer">
+          <div class="bh-price">€${l.price}<span>${T[lang].night}</span></div>
+          <div class="bh-rating">★ ${l.rating} (${l.reviews})</div>
+        </div>
+        <div class="bh-avail-row">${l.avail.map(a=>`<div class="bh-avail-dot ${a?'':'busy'}"></div>`).join('')}</div>
+        <div class="avail-label">${T[lang].nights}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openModal(i) {
+  selectedListing = listings[i];
+  const l = listings[i];
+  const title = lang==='bg' ? l.titleBG : l.title;
+  document.getElementById('modal-img').className = 'bh-modal-img ' + l.img;
+  document.getElementById('modal-img').textContent = l.emoji;
+  document.getElementById('modal-city').textContent = l.city;
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-details').innerHTML = `
+    <div class="bh-detail-card"><div class="bh-detail-num">€${l.price}</div><div class="bh-detail-label">${T[lang].price_night}</div></div>
+    <div class="bh-detail-card"><div class="bh-detail-num">${l.beds} ${l.beds>1?T[lang].beds:T[lang].bed}</div><div class="bh-detail-label">${l.guests} ${T[lang].guests}</div></div>
+    <div class="bh-detail-card"><div class="bh-detail-num">${l.rating}★</div><div class="bh-detail-label">${l.reviews} ${T[lang].reviews}</div></div>`;
+  document.getElementById('modal-amenities').innerHTML = l.amenities.map(a=>`<div class="bh-amenity">${a}</div>`).join('');
+  document.getElementById('modal-avail').innerHTML = l.avail.map(a=>`<div class="bh-avail-dot ${a?'':'busy'}"></div>`).join('');
+  document.getElementById('modal-book-btn').textContent = T[lang].request_book;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+document.getElementById('modal-book-btn').addEventListener('click', function() {
+  if (!selectedListing) return;
+  document.getElementById('modal-overlay').classList.remove('open');
+  const l = selectedListing;
+  const title = lang==='bg' ? l.titleBG : l.title;
+  document.getElementById('summary-img').className = 'summary-img ' + l.img;
+  document.getElementById('summary-img').textContent = l.emoji;
+  document.getElementById('summary-city').textContent = l.city;
+  document.getElementById('summary-title').textContent = title;
+  document.getElementById('summary-price-night').textContent = `€${l.price}`;
+  document.getElementById('summary-fee').textContent = `€${Math.round(l.price*0.05)}`;
+  const ci = document.getElementById('checkin-date').value;
+  const co = document.getElementById('checkout-date').value;
+  if (ci) document.getElementById('book-checkin').value = ci;
+  if (co) document.getElementById('book-checkout').value = co;
+  updateTotal();
+  document.getElementById('book-checkin').addEventListener('change', updateTotal);
+  document.getElementById('book-checkout').addEventListener('change', updateTotal);
+  showPage('page-booking');
+});
+
+function updateTotal() {
+  if (!selectedListing) return;
+  const ci = document.getElementById('book-checkin').value;
+  const co = document.getElementById('book-checkout').value;
+  if (ci && co) {
+    const n = Math.max(0, Math.round((new Date(co)-new Date(ci))/86400000));
+    if (n > 0) {
+      const base = selectedListing.price * n;
+      const fee = Math.round(base*0.05);
+      document.getElementById('summary-nights').textContent = n;
+      document.getElementById('summary-fee').textContent = `€${fee}`;
+      document.getElementById('summary-total').textContent = `€${base+fee}`;
+      return;
+    }
+  }
+  document.getElementById('summary-nights').textContent = '—';
+  document.getElementById('summary-total').textContent = '—';
+}
+
+function submitBooking() {
+  const ref = 'BH-' + Math.random().toString(36).substring(2,8).toUpperCase();
+  document.getElementById('confirm-ref-num').textContent = ref;
+  const l = selectedListing;
+  const title = lang==='bg' ? l.titleBG : l.title;
+  const ci = document.getElementById('book-checkin').value || '—';
+  const co = document.getElementById('book-checkout').value || '—';
+  document.getElementById('confirm-details').innerHTML = `
+    <div class="confirm-detail"><div class="cd-label">${T[lang].check_in}</div><div class="cd-value">${ci}</div></div>
+    <div class="confirm-detail"><div class="cd-label">${T[lang].check_out}</div><div class="cd-value">${co}</div></div>
+    <div class="confirm-detail"><div class="cd-label">Property</div><div class="cd-value">${title}</div></div>
+    <div class="confirm-detail"><div class="cd-label">${T[lang].total}</div><div class="cd-value">${document.getElementById('summary-total').textContent}</div></div>`;
+  showPage('page-confirm');
+}
+
+function closeModal(e) { if (e.target===document.getElementById('modal-overlay')) closeModalDirect(); }
+function closeModalDirect() { document.getElementById('modal-overlay').classList.remove('open'); }
+function filterCity(el,city) { document.querySelectorAll('.bh-city-pill').forEach(p=>p.classList.remove('active')); el.classList.add('active'); currentCity=city; renderListings(); }
+function sortListings(v) { currentSort=v; renderListings(); }
+function doSearch() { currentCity=document.getElementById('city-select').value; document.querySelectorAll('.bh-city-pill').forEach(p=>p.classList.remove('active')); renderListings(); document.querySelector('.bh-main').scrollIntoView({behavior:'smooth'}); }
+function selectPay(el,type) { document.querySelectorAll('.pay-option').forEach(p=>p.classList.remove('selected')); el.classList.add('selected'); document.getElementById('card-fields').classList.toggle('visible',type==='card'); }
+function showPage(id) { document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); document.getElementById(id).classList.add('active'); window.scrollTo(0,0); }
+function goHome() { showPage('page-main'); }
+function goBack() { showPage('page-main'); }
+
+setLang('en');
+</script>
+</body>
+</html>
